@@ -2,31 +2,32 @@ const request = require('supertest');
 const app = require('../../app');
 const {
     mongoConnect,
-    mongoDisconnect
-} = require("../../services/mongo");
-const { loadPlanetData } = require('../../models/planets.model');
+    mongoDisconnect,
+} = require('../../services/mongo');
+const {
+    loadPlanetData,
+} = require('../../models/planets.model');
+
+require('dotenv').config();
 
 describe('Launches API', () => {
-
-    beforeAll(async () => {
-        await mongoConnect();
-        await loadPlanetData();
-    });
+    beforeAll(
+        async () => {
+            await mongoConnect();
+            await loadPlanetData();
+        }, 100000);
 
     afterAll(async () => {
-        await mongoDisconnect();
-        await loadPlanetData();
+        // await mongoDisconnect();
+        await new Promise(resolve => setTimeout(() => resolve(), 500)); // avoid jest open handle error
     });
 
-    // describe are also called fixtures.
-    describe('Test GET / launches', () => {
+    describe('Test GET /launches', () => {
         test('It should respond with 200 success', async () => {
             const response = await request(app)
                 .get('/v1/launches')
                 .expect('Content-Type', /json/)
                 .expect(200);
-            // expect are also called assertions.
-            // expect(response.statusCode).toBe(200);
         });
     });
 
@@ -35,21 +36,21 @@ describe('Launches API', () => {
             mission: 'USS Enterprise',
             rocket: 'NCC 1701-D',
             target: 'Kepler-62 f',
-            launchDate: 'January 4, 2028'
+            launchDate: 'January 4, 2028',
         };
 
         const launchDataWithoutDate = {
             mission: 'USS Enterprise',
             rocket: 'NCC 1701-D',
             target: 'Kepler-62 f',
-        }
+        };
 
         const launchDataWithInvalidDate = {
             mission: 'USS Enterprise',
             rocket: 'NCC 1701-D',
             target: 'Kepler-62 f',
-            launchDate: 'zoot'
-        }
+            launchDate: 'zoot',
+        };
 
         test('It should respond with 201 created', async () => {
             const response = await request(app)
@@ -89,6 +90,4 @@ describe('Launches API', () => {
             });
         });
     });
-
-})
-
+});
